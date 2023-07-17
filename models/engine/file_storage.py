@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
+from sqlalchemy import delete
 
 
 class FileStorage:
@@ -9,18 +10,21 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """
-        returns dict of models of specified class
-        if no class specified, return all models in storage
-        """
-        if cls is None:
-            return FileStorage.__objects
+        """Returns a dictionary of models currently in storage"""
+        if cls is not None:
+            # using dictionary comprehension
+            return {key: value for key,
+                    value in self.__objects
+                    .items() if isinstance(value, cls)}
         else:
-            new_dict = {}
-            for key, val in FileStorage.__objects.items():
-                if val.__class__ == cls:
-                    new_dict[key] = val
-            return new_dict
+            return self.__objects
+
+    def delete(self, obj=None):
+        """ Deletes obj from the file storage if it exists """
+        if obj is not None:
+            obj_key = obj.__class__.__name__ + '.' + obj.id
+            if obj_key in self.__objects:
+                del self.__objects[obj_key]
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -50,6 +54,7 @@ class FileStorage:
                     'State': State, 'City': City, 'Amenity': Amenity,
                     'Review': Review
                   }
+
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
@@ -59,12 +64,6 @@ class FileStorage:
         except FileNotFoundError:
             pass
 
-    def delete(self, obj=None):
-        """
-        will delete specified class by its id
-        """
-        if obj is not None:
-            key = obj.__class__.__name__ + "." + obj.id
-            if key in self.__objects:
-                del self.__objects[key]
-                self.save()
+    def close(self):
+        """Deserializes the JSON file to objects"""
+        self.reload()
