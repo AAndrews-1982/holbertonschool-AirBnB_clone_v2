@@ -5,10 +5,12 @@ from models import storage
 
 app = Flask(__name__)
 
+
 @app.teardown_appcontext
 def teardown_appcontext(exception):
     """tears down session"""
     storage.close()
+
 
 @app.route('/cities_by_states', strict_slashes=False)
 def cities_by_states():
