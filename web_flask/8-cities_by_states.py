@@ -13,8 +13,8 @@ def teardown_appcontext(exception):
 
 
 @app.route('/cities_by_states', strict_slashes=False)
-def cities_by_states():
-    """ Display HTML page with States and their cities """
+def states_list():
+    """ Display HTML page with States and their Cities """
     states = storage.all('State').values()
     states = sorted(states, key=lambda x: x.name)
     return render_template('8-cities_by_states.html', states=states)
